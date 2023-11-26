@@ -1,6 +1,11 @@
 from builtin.builtin_list import ListLiteral
 from memory.unsafe import Pointer
 from builtin.io import _Printable
+from python import Python
+from utils.index import Index
+from random import rand
+from common.io import get_lines
+from utils.vector import DynamicVector
 
 # Casting stuff: https://mojodojo.dev/guides/benchmarks/sudoku.html
 
@@ -42,11 +47,35 @@ fn sort(inout arr: List[Int]):
                 arr[i] = arr[j]
                 arr[j] = tmp
 
-def main():
+fn from_np[type: DType](a: PythonObject) raises -> Tensor[type]:
+    let w = a.shape[0].to_float64().to_int()
+    let h = a.shape[1].to_float64().to_int()
+    var out = Tensor[type](w, h)
+    for i in range(w):
+        for j in range(h):
+            out[Index(i, j)] = a[i][j].to_float64().cast[type]()
+    return out
+
+fn list_sort_test():
     var arr = List[Int]([5, 3, 5, 1, 2, 7, 6, 9, 7, 4, 3, 2])
     print_arr(arr)
     sort(arr)
     print_arr(arr)
+
+fn tensor_from_np_test() raises:
+    let np = Python.import_module("numpy")
+    let t = from_np[DType.float32](np.random.randn(2, 2))
+    print(t)
+
+fn main() raises:
+    #let s = PythonObject("HELLO").lower().to_string()
+    #print(s)
+    #print(rand[DType.float32](1, 2, 3))
+    
+    #list_sort_test()
+    #tensor_from_np_test()
+    let lines = get_lines('input.txt')
+
     print("Done")
 
 # what?

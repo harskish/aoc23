@@ -10,7 +10,9 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/sort_dbg",
             "args": [],
-            "env": [],
+            "env": [
+                "MOJO_PYTHON_LIBRARY=/Users/erik/miniconda3/envs/anyscale/bin/python",
+            ],
             "cwd": "${workspaceFolder}",
             "initCommands": [
                 "platform shell make -C ${workspaceFolder} debug"
