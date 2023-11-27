@@ -1,5 +1,5 @@
 from python import Python
-#from .vector import Vector
+from .stringvector import StringVector
 
 fn get_contents(infile: String) -> String:
     try:
@@ -7,20 +7,18 @@ fn get_contents(infile: String) -> String:
     except:
         return ""
 
-fn get_lines(infile: String): # -> Vector[String]:
-    #var ret = Vector[String](512)
+fn get_lines(infile: String) -> StringVector:
+    var ret = StringVector(32)
     var curr_str: String = ""
     let contents = get_contents(infile)
     for i in range(len(contents)):
         let c = contents[i]
         if c == "\n":
-            print(curr_str)
-            #ret.push_back(curr_str)
+            ret.push_back(curr_str)
             curr_str = ""
         else:
             curr_str += c
     if curr_str != "":
-        #ret.push_back(curr_str)
-        pass
+        ret.push_back(curr_str)
 
-    #return ret
+    return ret^ # transfer ownership

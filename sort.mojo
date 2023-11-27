@@ -43,9 +43,7 @@ fn sort(inout arr: List[Int]):
     for i in range(arr.count):
         for j in range(i, arr.count):
             if arr[j] < arr[i]:
-                let tmp = arr[i]
-                arr[i] = arr[j]
-                arr[j] = tmp
+                arr[i], arr[j] = arr[j], arr[i]
 
 fn from_np[type: DType](a: PythonObject) raises -> Tensor[type]:
     let w = a.shape[0].to_float64().to_int()
@@ -68,27 +66,9 @@ fn tensor_from_np_test() raises:
     print(t)
 
 fn main() raises:
-    #let s = PythonObject("HELLO").lower().to_string()
-    #print(s)
-    #print(rand[DType.float32](1, 2, 3))
-    
-    #list_sort_test()
-    #tensor_from_np_test()
-    #let lines = get_lines('input.txt')
+    let lines = get_lines('input.txt')
 
-    var v = StringVector()
-    v.push_back("Hello")
-    v.push_back("World")
-    v.push_back(",")
-    v.push_back("how")
-    v.push_back("is")
-    v.push_back("it")
-    v.push_back("going?")
-
-    v[0] = "Goodbye"
-    #v.resize(4)
-
-    for s in v:
+    for s in lines:
         print(s)
 
     print("Done")
