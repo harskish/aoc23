@@ -86,7 +86,7 @@ fn main() raises:
     v.push_back("going?")
 
     v[0] = "Goodbye"
-    v.resize(1)
+    #v.resize(4)
 
     for s in v:
         print(s)

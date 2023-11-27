@@ -17,8 +17,9 @@ struct StringVector:
     fn push_back(inout self, value: String):
         if self.size == self.capacity:
             self.grow()
-        let data = DTypePointer[DType.int8].alloc(len(value))
+        let data = DTypePointer[DType.int8].alloc(len(value) + 1)
         memcpy(data, value._buffer.data, len(value))
+        data.store(len(value), 0) # null terminator
         self.storage.store(self.size, data)
         self.size += 1
     
@@ -28,7 +29,7 @@ struct StringVector:
     fn resize(inout self, newsize: Int):
         let storage_old = self.storage
         self.storage = Pointer[DTypePointer[DType.int8]].alloc(newsize)
-        memcpy(self.storage, storage_old, newsize)
+        memcpy(self.storage, storage_old, math.min(newsize, self.capacity))
         
         # If shrinking: free overflow
         for i in range(newsize, self.capacity):
