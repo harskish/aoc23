@@ -5,7 +5,7 @@ from python import Python
 from utils.index import Index
 from random import rand
 from common.io import get_lines
-from utils.vector import DynamicVector
+from common.stringvector import StringVector
 
 # Casting stuff: https://mojodojo.dev/guides/benchmarks/sudoku.html
 
@@ -74,7 +74,22 @@ fn main() raises:
     
     #list_sort_test()
     #tensor_from_np_test()
-    let lines = get_lines('input.txt')
+    #let lines = get_lines('input.txt')
+
+    var v = StringVector()
+    v.push_back("Hello")
+    v.push_back("World")
+    v.push_back(",")
+    v.push_back("how")
+    v.push_back("is")
+    v.push_back("it")
+    v.push_back("going?")
+
+    v[0] = "Goodbye"
+    v.resize(1)
+
+    for s in v:
+        print(s)
 
     print("Done")
 
