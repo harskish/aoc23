@@ -18,8 +18,7 @@ struct StringVector:
         if self.size == self.capacity:
             self.grow()
         let data = DTypePointer[DType.int8].alloc(len(value) + 1)
-        memcpy(data, value._buffer.data, len(value))
-        data.store(len(value), 0) # null terminator
+        memcpy(data, value._buffer.data, len(value) + 1) # including null terminator
         self.storage.store(self.size, data)
         self.size += 1
     
