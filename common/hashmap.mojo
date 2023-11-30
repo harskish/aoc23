@@ -22,10 +22,10 @@ struct StringMap[V: AnyType]:
 
     fn __init__(inout self):
         self.num_elems = 0
-        self.num_buckets = 4 #64
-        self.keys = Pointer[strtype].alloc(0)
-        self.vals = Pointer[V].alloc(0)
-        self.taken_mask = Pointer[Bool].alloc(0)
+        self.num_buckets = 32
+        self.keys = Pointer[strtype].get_null()
+        self.vals = Pointer[V].get_null()
+        self.taken_mask = Pointer[Bool].get_null()
         self.alloc_buffers()
 
     fn alloc_buffers(inout self):
@@ -79,7 +79,7 @@ struct StringMap[V: AnyType]:
     
     fn __setitem__(inout self, key: String, value: V):
         if self.load_factor() > 0.65:
-            #print("Growing")
+            print("Growing to", 2*self.num_buckets)
             self.grow()
 
         var idx = self.index_of(key)

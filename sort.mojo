@@ -66,18 +66,22 @@ fn tensor_from_np_test() raises:
     let t = from_np[DType.float32](np.random.randn(2, 2))
     print(t)
 
+fn string_map_test() raises:
+    let K = 1024
+    var mydict = StringMap[Int32]()
+    for i in range(K):
+        mydict["key" + String(i)] = i
+    for i in range(K):
+        if mydict["key" + String(i)] != i:
+            raise Error("StringMap content error")
+    print("StringMap test passed")
+
 fn main() raises:
     let lines = get_lines('input.txt')
-    # for s in lines:
-    #     print(s)
+    #for s in lines:
+    #    print(s)
 
-    var mydict = StringMap[Int32]()
-    for i in range(20):
-        mydict["key" + String(i)] = i
-    
-    for i in range(20):
-       let key = "key" + String(i)
-       print(key, "=", mydict[key])
+    string_map_test()
 
     print("Done")
 
