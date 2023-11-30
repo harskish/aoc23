@@ -6,6 +6,7 @@ from utils.index import Index
 from random import rand
 from common.io import get_lines
 from common.stringvector import StringVector
+from common.hashmap import StringMap
 
 # Casting stuff: https://mojodojo.dev/guides/benchmarks/sudoku.html
 
@@ -67,9 +68,16 @@ fn tensor_from_np_test() raises:
 
 fn main() raises:
     let lines = get_lines('input.txt')
+    # for s in lines:
+    #     print(s)
 
-    for s in lines:
-        print(s)
+    var mydict = StringMap[Int32]()
+    for i in range(20):
+        mydict["key" + String(i)] = i
+    
+    for i in range(20):
+       let key = "key" + String(i)
+       print(key, "=", mydict[key])
 
     print("Done")
 
