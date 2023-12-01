@@ -31,7 +31,7 @@ fn startswith(source: String, target: String) -> Bool:
     
     return True
 
-# Python-esque: wont read out of bounds
+# Python-esque: won't read out of bounds
 fn substr(source: String, start: Int, length: Int) -> String:
     let num_chars = min(len(source) - start, length)
     let data = DTypePointer[DType.int8].alloc(num_chars + 1)
