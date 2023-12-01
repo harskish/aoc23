@@ -8,7 +8,7 @@ fn get_contents(infile: String) -> String:
         return ""
 
 fn get_lines(infile: String) -> StringVector:
-    var ret = StringVector(32)
+    var ret = StringVector()
     var curr_str: String = ""
     let contents = get_contents(infile)
     for i in range(len(contents)):

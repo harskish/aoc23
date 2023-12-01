@@ -5,17 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Sort Debug",
+            "name": "Solve Debug",
             "type": "mojo-lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/sort_dbg",
+            "program": "${workspaceFolder}/build/solve_dbg",
             "args": [],
             "env": [
                 "MOJO_PYTHON_LIBRARY=/Users/erik/miniconda3/envs/anyscale/bin/python",
             ],
             "cwd": "${workspaceFolder}",
             "initCommands": [
-                "platform shell make -C ${workspaceFolder} debug"
+                "platform shell make -C ${workspaceFolder} debug_nocache"
             ]
         },
     ]

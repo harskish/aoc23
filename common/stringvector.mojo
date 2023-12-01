@@ -4,20 +4,22 @@ import math
 
 # https://mzaks.medium.com/counting-chars-with-simd-in-mojo-140ee730bd4d
 
+alias strtype = DTypePointer[DType.int8]
+
 struct StringVector:
     var size: Int
     var capacity: Int
-    var storage: Pointer[DTypePointer[DType.int8]]
+    var storage: Pointer[strtype]
 
-    fn __init__(inout self, capacity: Int = 2):
+    fn __init__(inout self):
         self.size = 0
-        self.capacity = math.max(1, capacity)
-        self.storage = Pointer[DTypePointer[DType.int8]].alloc(self.capacity)
+        self.capacity = 32
+        self.storage = Pointer[strtype].alloc(self.capacity)
 
     fn push_back(inout self, value: String):
         if self.size == self.capacity:
             self.grow()
-        let data = DTypePointer[DType.int8].alloc(len(value) + 1)
+        let data = strtype.alloc(len(value) + 1)
         memcpy(data, value._buffer.data, len(value) + 1) # including null terminator
         self.storage.store(self.size, data)
         self.size += 1
@@ -25,9 +27,17 @@ struct StringVector:
     fn grow(inout self):
         self.resize(2*self.capacity)
 
+    fn extend[*Ts: AnyType](inout self, owned literal: ListLiteral[Ts]):
+        # https://mojodojo.dev/guides/builtins/BuiltinList.html#fields
+        # https://github.com/modularml/mojo/issues/655
+        let src = Pointer.address_of(literal).bitcast[StringLiteral]()
+        for i in range(len(literal)):
+            let s = String(src.load(i))
+            self.push_back(s)
+
     fn resize(inout self, newsize: Int):
         let storage_old = self.storage
-        self.storage = Pointer[DTypePointer[DType.int8]].alloc(newsize)
+        self.storage = Pointer[strtype].alloc(newsize)
         memcpy(self.storage, storage_old, math.min(newsize, self.capacity))
         
         # If shrinking: free overflow
@@ -41,12 +51,12 @@ struct StringVector:
         #print('New capacity:', self.capacity)
         
     fn __getitem__(inout self, index: Int) -> String:
-        let d: DTypePointer[DType.int8] = self.storage.load(index)
+        let d: strtype = self.storage.load(index)
         return String(d)
 
     fn __setitem__(inout self, i: Int, value: String):
         self.storage.load(i).free()
-        let data = DTypePointer[DType.int8].alloc(len(value))
+        let data = strtype.alloc(len(value))
         memcpy(data, value._buffer.data, len(value))
         self.storage.store(i, data)
 
@@ -60,10 +70,6 @@ struct StringVector:
 
     fn len(inout self) -> Int:
         return self.size
-    
-    fn extend(inout self, other: StringVector):
-        for item in other:
-            self.push_back(item)
     
     fn clear(inout self):
         self.size = 0
@@ -112,9 +118,9 @@ struct StringVector:
 struct StringListIterator:
     var offset: Int
     var max_idx: Int
-    var storage: Pointer[DTypePointer[DType.int8]]
+    var storage: Pointer[strtype]
     
-    fn __init__(inout self, storage: Pointer[DTypePointer[DType.int8]], max_idx: Int):
+    fn __init__(inout self, storage: Pointer[strtype], max_idx: Int):
         self.offset = 0
         self.max_idx = max_idx
         self.storage = storage
