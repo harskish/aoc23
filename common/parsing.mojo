@@ -60,22 +60,13 @@ fn first_substr_match(source: String, inout targets: StringVector) -> Tuple[Int,
     
     return (-1, -1)
 
-fn find(source: String, target: String) -> Int:
-    let window = len(target)
-    for i in range(len(source)):
-        let ss = substr(source, i, window)
-        if startswith(ss, target):
-            return i
-    return -1
-
 # Matches python's string.split
 fn split(source: String, target: String) -> StringVector:
     var ranges = DynamicVector[Tuple[Int, Int]]()
     
     var i = 0
     while True:
-        let ss = substr(source, i)
-        let offs = find(ss, target)
+        let offs = source.find(target, i)
         if offs == -1:
             ranges.push_back((i, len(source)))
             break
