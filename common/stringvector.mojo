@@ -2,8 +2,6 @@ from utils.vector import DynamicVector
 from memory import memcpy
 import math
 
-# https://mzaks.medium.com/counting-chars-with-simd-in-mojo-140ee730bd4d
-
 alias strtype = DTypePointer[DType.int8]
 
 struct StringVector:
@@ -15,6 +13,12 @@ struct StringVector:
         self.size = 0
         self.capacity = 32
         self.storage = Pointer[strtype].alloc(self.capacity)
+    
+    fn __init__[*Ts: AnyType](inout self, owned literal: ListLiteral[Ts]):
+        self.size = 0
+        self.capacity = len(literal)
+        self.storage = Pointer[strtype].alloc(self.capacity)
+        self.extend(literal^)
 
     fn push_back(inout self, value: String):
         if self.size == self.capacity:
@@ -42,13 +46,11 @@ struct StringVector:
         
         # If shrinking: free overflow
         for i in range(newsize, self.capacity):
-            #print('Freeing index', i)
             storage_old[i].free()
 
         storage_old.free()
         self.size = math.min(newsize, self.capacity)
         self.capacity = newsize
-        #print('New capacity:', self.capacity)
         
     fn __getitem__(inout self, index: Int) -> String:
         let d: strtype = self.storage.load(index)
@@ -75,16 +77,16 @@ struct StringVector:
         self.size = 0
         self.resize(0)
     
-    # fn reverse(inout self):
-    #     var left: Int = 0
-    #     var right: Int = self.size - 1
-    #     let temp: T
-    #     while left <= right:
-    #         temp = self.storage.load(left)
-    #         self.storage.store(left, self.storage.load(right))
-    #         self.storage.store(right, temp)
-    #         left += 1
-    #         right -= 1
+    fn reverse(inout self):
+        var left: Int = 0
+        var right: Int = self.size - 1
+        let temp: strtype
+        while left <= right:
+            temp = self.storage.load(left)
+            self.storage.store(left, self.storage.load(right))
+            self.storage.store(right, temp)
+            left += 1
+            right -= 1
 
     # fn remove(inout self, index: Int):
     #     for i in range(index, self.size):

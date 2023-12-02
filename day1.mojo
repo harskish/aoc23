@@ -16,8 +16,7 @@ fn part1() raises -> String:
     return String(total) #53386
 
 fn part2() raises -> String:
-    var pattern_fwd = StringVector()
-    pattern_fwd.extend([
+    var pattern_fwd = StringVector([
         "0", "1", "2", "3", "4",
         "5", "6", "7", "8", "9",
         "zero", "one", "two", "three", "four",
