@@ -39,6 +39,10 @@ fn substr(source: String, start: Int, length: Int) -> String:
     memcpy(data, source._buffer.data.offset(start), num_chars)
     return String(data)
 
+# From start index until end
+fn substr(source: String, start: Int) -> String:
+    return substr(source, start, len(source))
+
 # Find first substring using list of candidates
 # Returns:
 #   i: index into source string
@@ -55,3 +59,34 @@ fn first_substr_match(source: String, inout targets: StringVector) -> Tuple[Int,
                 return (i, j)
     
     return (-1, -1)
+
+fn find(source: String, target: String) -> Int:
+    let window = len(target)
+    for i in range(len(source)):
+        let ss = substr(source, i, window)
+        if startswith(ss, target):
+            return i
+    return -1
+
+# Matches python's string.split
+fn split(source: String, target: String) -> StringVector:
+    var ranges = DynamicVector[Tuple[Int, Int]]()
+    
+    var i = 0
+    while True:
+        let ss = substr(source, i)
+        let offs = find(ss, target)
+        if offs == -1:
+            ranges.push_back((i, len(source)))
+            break
+        else:
+            ranges.push_back((i, i+offs))
+            i += len(target) + offs
+    
+    var parts = StringVector()
+    for i in range(len(ranges)):
+        let i1 = ranges[i].get[0, Int]()
+        let i2 = ranges[i].get[1, Int]()
+        parts.push_back(substr(source, i1, i2-i1))
+    
+    return parts^
