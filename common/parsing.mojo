@@ -31,18 +31,6 @@ fn startswith(source: String, target: String) -> Bool:
     
     return True
 
-# Python-esque: won't read out of bounds
-fn substr(source: String, start: Int, length: Int) -> String:
-    let num_chars = min(len(source) - start, length)
-    let data = DTypePointer[DType.int8].alloc(num_chars + 1)
-    data.store(num_chars, 0) # null terminator
-    memcpy(data, source._buffer.data.offset(start), num_chars)
-    return String(data)
-
-# From start index until end
-fn substr(source: String, start: Int) -> String:
-    return substr(source, start, len(source))
-
 # Find first substring using list of candidates
 # Returns:
 #   i: index into source string
@@ -53,7 +41,7 @@ fn first_substr_match(source: String, inout targets: StringVector) -> Tuple[Int,
        window_size = max(window_size, len(s))
     
     for i in range(len(source)):
-        let substr = substr(source, i, window_size) # won't read OOB
+        let substr = source[i:i+window_size]
         for j in range(targets.size):
             if startswith(substr, targets[j]):
                 return (i, j)
@@ -78,6 +66,6 @@ fn split(source: String, target: String) -> StringVector:
     for i in range(len(ranges)):
         let i1 = ranges[i].get[0, Int]()
         let i2 = ranges[i].get[1, Int]()
-        parts.push_back(substr(source, i1, i2-i1))
+        parts.push_back(source[i1:i2])
     
     return parts^

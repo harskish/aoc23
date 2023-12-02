@@ -1,7 +1,7 @@
 from common.stringvector import StringVector
 from common.hashmap import StringMap
 from common.io import get_lines
-from common.parsing import split, substr
+from common.parsing import split
 from math import max
 
 fn part1() raises -> String:    
@@ -13,13 +13,12 @@ fn part1() raises -> String:
     var total = 0
     for line in get_lines('inputs/day2.txt'):
         var parts = split(line, ":")
-        let gamenr = atol(substr(parts[0], len("Game ")))
+        let gamenr = atol(parts[0][5:]) # drop "Game "
         var all_valid = True
         for pull in split(parts[1], ";"):
             let groups = split(pull, ",")
             for group in groups:
-                let stripped = substr(group, 1) # no leading space
-                var count_color = split(stripped, " ")
+                var count_color = split(group[1:], " ")
                 let is_valid = atol(count_color[0]) <= counts[count_color[1]]
                 all_valid = all_valid and is_valid
         total += gamenr if all_valid else 0
@@ -35,13 +34,10 @@ fn part2() raises -> String:
         max_seen["blue"] = 0
 
         var parts = split(line, ":")
-        let gamenr = atol(substr(parts[0], len("Game ")))
-
         for pull in split(parts[1], ";"):
             let groups = split(pull, ",")
             for group in groups:
-                let stripped = substr(group, 1) # no leading space
-                var count_color = split(stripped, " ")
+                var count_color = split(group[1:], " ")
                 let new_max = max(max_seen[count_color[1]], atol(count_color[0]))
                 max_seen[count_color[1]] = new_max
 
