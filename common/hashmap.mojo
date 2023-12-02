@@ -86,7 +86,8 @@ struct StringMap[V: AnyType]:
         #print("Adding", key, "at index", idx)
 
         while self.taken_mask[idx]:
-            #print('Collision at', idx)
+            if self.comp_key(self.keys[idx], key):
+                break # writing over previous value
             idx = (idx + 1) % self.num_buckets
         
         # Store a copy of the string
