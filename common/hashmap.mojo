@@ -85,16 +85,19 @@ struct StringMap[V: AnyType]:
         var idx = self.index_of(key)
         #print("Adding", key, "at index", idx)
 
+        var overwriting = False
         while self.taken_mask[idx]:
             if self.comp_key(self.keys[idx], key):
-                break # writing over previous value
+                overwriting = True
+                break
             idx = (idx + 1) % self.num_buckets
         
-        # Store a copy of the string
-        let str_copy = strtype.alloc(len(key) + 1)
-        memcpy(str_copy, key._buffer.data, len(key) + 1)
-        self.keys.store(idx, str_copy)
+        # Store a copy of the key string
+        if not overwriting:
+            let str_copy = strtype.alloc(len(key) + 1)
+            memcpy(str_copy, key._buffer.data, len(key) + 1)
+            self.keys.store(idx, str_copy)
+            self.num_elems += 1
 
         self.vals.store(idx, value)
         self.taken_mask.store(idx, True)
-        self.num_elems += 1
