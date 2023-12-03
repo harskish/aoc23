@@ -1,3 +1,5 @@
+from .stringvector import StringVector
+
 alias strtype = Pointer[SIMD[DType.int8, 1]]
 
 # Return 64-bit FNV-1a hash for key (NUL-terminated). See description:
@@ -40,12 +42,20 @@ struct StringMap[V: AnyType]:
     fn load_factor(inout self) -> Float32:
         return Float32(self.num_elems) / self.num_buckets
     
-    fn index_of(inout self, key: String) -> Int:
+    fn index_of(self, key: String) -> Int:
         return fnv_hash(key).to_int() % self.num_buckets
 
-    fn comp_key(inout self, key1: strtype, key2: String) -> Bool:
+    fn comp_key(self, key1: strtype, key2: String) -> Bool:
         let key1_string = String(key1)
         return key1_string == key2
+
+    fn contains(self, key: String) -> Bool:
+        let base_idx = self.index_of(key)
+        for i in range(self.num_buckets):
+            let idx = (base_idx + i) % self.num_buckets
+            if self.taken_mask[idx] and self.comp_key(self.keys[idx], key):
+                return True
+        return False
 
     # Doubles the size of the storage
     fn grow(inout self):
@@ -79,7 +89,7 @@ struct StringMap[V: AnyType]:
     
     fn __setitem__(inout self, key: String, value: V):
         if self.load_factor() > 0.65:
-            print("Growing to", 2*self.num_buckets)
+            #print("Growing to", 2*self.num_buckets)
             self.grow()
 
         var idx = self.index_of(key)
@@ -101,3 +111,29 @@ struct StringMap[V: AnyType]:
 
         self.vals.store(idx, value)
         self.taken_mask.store(idx, True)
+        
+    fn get_keys(self) -> StringVector:
+        var ret = StringVector()
+        for i in range(self.num_buckets):
+            if self.taken_mask[i]:
+                ret.push_back(String(self.keys[i]))
+        return ret^
+
+struct IntMap[V: AnyType]:
+    var strmap: StringMap[V]
+    fn __init__(inout self):
+        self.strmap = StringMap[V]()
+    fn __getitem__(inout self, key: Int) raises -> V:
+        return self.strmap[String(key)]
+    fn __setitem__(inout self, key: Int, value: V) raises:
+        self.strmap[String(key)] = value
+    fn contains(self, key: Int) -> Bool:
+        return self.strmap.contains(String(key))
+    fn get_keys(self) -> DynamicVector[Int]:
+        var keys_int = DynamicVector[Int]()
+        try:
+            for key in self.strmap.get_keys():
+                keys_int.push_back(atol(key))
+        except:
+            print("Key conversion error")
+        return keys_int^

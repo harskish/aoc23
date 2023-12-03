@@ -10,10 +10,13 @@ struct StringVector:
     var storage: Pointer[strtype]
 
     fn __init__(inout self):
-        self.size = 0
-        self.capacity = 32
-        self.storage = Pointer[strtype].alloc(self.capacity)
+        self.__init__(32)
     
+    fn __init__(inout self, capacity: Int):
+        self.size = 0
+        self.capacity = capacity
+        self.storage = Pointer[strtype].alloc(self.capacity)
+
     fn __init__[*Ts: AnyType](inout self, owned literal: ListLiteral[Ts]):
         self.size = 0
         self.capacity = len(literal)
@@ -70,7 +73,7 @@ struct StringVector:
         self.capacity = previous.capacity
         self.storage = previous.storage
 
-    fn len(inout self) -> Int:
+    fn len(borrowed self) -> Int:
         return self.size
     
     fn clear(inout self):

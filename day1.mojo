@@ -42,3 +42,6 @@ fn part2() raises -> String:
         total += val_last # 1s place
 
     return String(total) # 53312
+
+fn solve() raises -> String:
+    return String(part1()) + ", " + String(part2())

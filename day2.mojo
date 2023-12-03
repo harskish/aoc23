@@ -45,3 +45,6 @@ fn part2() raises -> String:
         total += power
 
     return String(total) # 71220
+
+fn solve() raises -> String:
+    return String(part1()) + ", " + String(part2())
