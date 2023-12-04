@@ -12,7 +12,7 @@ struct Field:
     
     def __init__(inout self, owned data: String):
         self.field = data
-        var rows = split(data, "\n")
+        let rows = split(data, "\n")
         self.H = rows.len()
         self.W = len(rows[0])
     

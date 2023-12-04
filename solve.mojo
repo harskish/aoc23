@@ -3,9 +3,9 @@ from common.io import get_lines
 from common.hashmap import StringMap
 from test import check_previous
 
-import day3
+import day4
 
 fn main() raises:
     check_previous()
-    #print(day3.solve())
+    #print(day4.solve())
     print("Done")

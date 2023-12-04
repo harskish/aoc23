@@ -4,12 +4,32 @@ from .stringvector import StringVector
 # Get individual digits
 fn digits(input: String) -> DynamicVector[Int]:
     alias chr_lo = ord('0')
-    var res = DynamicVector[Int](len(input))
+    var res = DynamicVector[Int]()
     
     for i in range(len(input)):
         let digit: Int = input._buffer[i].to_int() - chr_lo
         if 0 <= digit <= 9:
             res.push_back(digit)
+    
+    return res
+
+# Extract integers
+fn ints(input: String) raises -> DynamicVector[Int]:
+    alias chr_lo = ord('0')
+    var res = DynamicVector[Int]()
+    
+    var accum: String = ""
+    for i in range(len(input)):
+        let char = input[i]
+        if isdigit(char._buffer[0].to_int()):
+            accum = accum + char
+        else:
+            if accum != "":
+                res.push_back(atol(accum))
+            accum = ""
+    
+    if accum != "":
+        res.push_back(atol(accum))
     
     return res
 

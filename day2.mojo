@@ -12,13 +12,13 @@ fn part1() raises -> String:
 
     var total = 0
     for line in get_lines('inputs/day2.txt'):
-        var parts = split(line, ":")
+        let parts = split(line, ":")
         let gamenr = atol(parts[0][5:]) # drop "Game "
         var all_valid = True
         for pull in split(parts[1], ";"):
             let groups = split(pull, ",")
             for group in groups:
-                var count_color = split(group[1:], " ")
+                let count_color = split(group[1:], " ")
                 let is_valid = atol(count_color[0]) <= counts[count_color[1]]
                 all_valid = all_valid and is_valid
         total += gamenr if all_valid else 0
@@ -33,11 +33,11 @@ fn part2() raises -> String:
         max_seen["green"] = 0
         max_seen["blue"] = 0
 
-        var parts = split(line, ":")
+        let parts = split(line, ":")
         for pull in split(parts[1], ";"):
             let groups = split(pull, ",")
             for group in groups:
-                var count_color = split(group[1:], " ")
+                let count_color = split(group[1:], " ")
                 let new_max = max(max_seen[count_color[1]], atol(count_color[0]))
                 max_seen[count_color[1]] = new_max
 

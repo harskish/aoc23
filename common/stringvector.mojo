@@ -55,7 +55,7 @@ struct StringVector:
         self.size = math.min(newsize, self.capacity)
         self.capacity = newsize
         
-    fn __getitem__(inout self, index: Int) -> String:
+    fn __getitem__(self, index: Int) -> String:
         let d: strtype = self.storage.load(index)
         return String(d)
 
