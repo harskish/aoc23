@@ -1,10 +1,11 @@
 from common.stringvector import StringVector
-from common.hashmap import StringMap
+from common.hashmap import IntMap, StringMap
+from common.hash import hash, HashableCollectionElement
 from common.io import get_lines
 from common.parsing import split
 from math import max
 
-fn part1() raises -> String:    
+fn part1() raises -> String:
     var counts = StringMap[Int]()
     counts["red"] = 12
     counts["green"] = 13

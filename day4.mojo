@@ -3,7 +3,6 @@ from common.hashmap import StringMap, IntMap
 from common.io import get_contents, get_lines
 from common.parsing import split, ints
 from common.sorting import selection_sort
-from common import List
 
 fn compute_matches(game: String) raises -> Int:
     let winning = ints(split(split(game, ":")[1], "|")[0])
@@ -31,7 +30,7 @@ fn recurse(
     inout memos: IntMap[Int],
     idx: Int
 ) raises -> Int:
-    if idx >= lines.len():
+    if idx >= len(lines):
         return 0 # out of bounds
 
     if memos.contains(idx):
@@ -49,7 +48,7 @@ fn part2() raises -> String:
     var memos = IntMap[Int]()
     var lines = get_lines('inputs/day4.txt')
     var total = 0
-    for i in range(lines.len()):
+    for i in range(len(lines)):
         total += recurse(lines, memos, i)
     return total
 

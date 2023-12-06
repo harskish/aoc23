@@ -55,14 +55,14 @@ fn startswith(source: String, target: String) -> Bool:
 # Returns:
 #   i: index into source string
 #   j: index of substring that was found
-fn first_substr_match(source: String, inout targets: StringVector) -> Tuple[Int, Int]:
+fn first_substr_match(source: String, inout targets: StringVector) raises -> Tuple[Int, Int]:
     var window_size = 0
     for s in targets:
        window_size = max(window_size, len(s))
     
     for i in range(len(source)):
         let substr = source[i:i+window_size]
-        for j in range(targets.size):
+        for j in range(len(targets)):
             if startswith(substr, targets[j]):
                 return (i, j)
     

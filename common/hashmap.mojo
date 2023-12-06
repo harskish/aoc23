@@ -1,139 +1,130 @@
-from .stringvector import StringVector
+# From: github.com/gabrieldemarmiesse/mojo-stdlib-extensions/tree/master
+# License: MIT
 
-alias strtype = Pointer[SIMD[DType.int8, 1]]
+from memory import memset_zero, memcpy
+from .hash import hash, HashableCollectionElement, HashableInt, HashableString
+from .stringvector import Vector
 
-# Return 64-bit FNV-1a hash for key (NUL-terminated). See description:
-# https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
-alias FNV_OFFSET = UInt64(14695981039346656037)
-alias FNV_PRIME = UInt64(1099511628211)
-fn fnv_hash(key: String) -> UInt64:
-    var hashval: UInt64 = FNV_OFFSET
-    for i in range(len(key)):
-        let p = UInt64(ord(key[i]))
-        hashval ^= p #(uint64_t)(unsigned char)(*p)
-        hashval *= FNV_PRIME
-    return hashval
+alias IntMap = HashMap[HashableInt]
+alias StringMap = HashMap[HashableString]
 
-struct StringMap[V: AnyType]:
-    var keys: Pointer[strtype]
-    var vals: Pointer[V]
-
-    var taken_mask: Pointer[Bool]
-    var num_buckets: Int
-    var num_elems: Int
+struct HashMap[K: HashableCollectionElement, V: CollectionElement](Sized):
+    var keys: Vector[K]
+    var values: Vector[V]
+    var key_map: Vector[Int]
+    var deleted_mask: DTypePointer[DType.bool]
+    var count: Int
+    var capacity: Int
 
     fn __init__(inout self):
-        self.num_elems = 0
-        self.num_buckets = 32
-        self.keys = Pointer[strtype].get_null()
-        self.vals = Pointer[V].get_null()
-        self.taken_mask = Pointer[Bool].get_null()
-        self.alloc_buffers()
+        self.count = 0
+        self.capacity = 16
+        self.keys = Vector[K]()
+        self.values = Vector[V]()
+        self.key_map = Vector[Int]()
+        for i in range(self.capacity):
+            self.key_map.push_back(0)
+        self.deleted_mask = DTypePointer[DType.bool].alloc(self.capacity)
+        memset_zero(self.deleted_mask, self.capacity)
 
-    fn alloc_buffers(inout self):
-        # HashNode split into two arrays
-        # Linear probing in case of collision
-        self.keys = self.keys.alloc(self.num_buckets)
-        self.vals = self.vals.alloc(self.num_buckets)
-        self.taken_mask = self.taken_mask.alloc(self.num_buckets)
-        for i in range(self.num_buckets):
-           self.taken_mask.store(i, False)
+    fn __setitem__(inout self, key: K, value: V):
+        if self.count / self.capacity >= 0.8:
+            self._rehash()
 
-    fn load_factor(inout self) -> Float32:
-        return Float32(self.num_elems) / self.num_buckets
-    
-    fn index_of(self, key: String) -> Int:
-        return fnv_hash(key).to_int() % self.num_buckets
+        self._put(key, value, -1)
 
-    fn comp_key(self, key1: strtype, key2: String) -> Bool:
-        let key1_string = String(key1)
-        return key1_string == key2
+    fn _make_deleted_mask_bigger(inout self, old_size: Int, new_size: Int):
+        let _deleted_mask = DTypePointer[DType.bool].alloc(new_size)
+        memset_zero(_deleted_mask, new_size)
+        memcpy(_deleted_mask, self.deleted_mask, old_size)
+        self.deleted_mask.free()
+        self.deleted_mask = _deleted_mask
 
-    fn contains(self, key: String) -> Bool:
-        let base_idx = self.index_of(key)
-        for i in range(self.num_buckets):
-            let idx = (base_idx + i) % self.num_buckets
-            if self.taken_mask[idx] and self.comp_key(self.keys[idx], key):
-                return True
-        return False
+    fn _rehash(inout self):
+        let old_mask_capacity = self.capacity
+        self.capacity *= 2
+        self.key_map = Vector[Int]()
+        for i in range(self.capacity):
+            self.key_map.push_back(0)
 
-    # Doubles the size of the storage
-    fn grow(inout self):
-        let keys_old = self.keys
-        let vals_old = self.vals
-        let mask_old = self.taken_mask
-        let len_old = self.num_buckets
+        self._make_deleted_mask_bigger(old_mask_capacity, self.capacity)
 
-        self.num_elems = 0
-        self.num_buckets *= 2
-        self.alloc_buffers()
+        for i in range(len(self.keys)):
+            self._put(self.keys.unchecked_get(i), self.values.unchecked_get(i), i + 1)
 
-        # Rehash content
-        # Load factor currently zero => no infinite recursion
-        for i in range(len_old):
-            if mask_old[i]:
-                #print_no_newline("[Rehashing] ")
-                self.__setitem__(String(keys_old[i]), vals_old[i])
-            
-        keys_old.free()
-        vals_old.free()
-        mask_old.free()
+    fn _put(inout self, key: K, value: V, rehash_index: Int):
+        let key_hash = hash(key)
+        let modulo_mask = self.capacity - 1
+        var key_map_index = key_hash % modulo_mask
+        while True:
+            let key_index = int(self.key_map.unchecked_get(index=key_map_index))
+            if key_index == 0:
+                let new_key_index: Int
+                if rehash_index == -1:
+                    self.keys.push_back(key)
+                    self.values.push_back(value)
+                    self.count += 1
+                    new_key_index = len(self.keys)
+                else:
+                    new_key_index = rehash_index
+                self.key_map.unchecked_set(key_map_index, new_key_index)
+                return
 
-    fn __getitem__(inout self, key: String) raises -> V:
-        let base_idx = self.index_of(key)
-        for i in range(self.num_buckets):
-            let idx = (base_idx + i) % self.num_buckets
-            if self.taken_mask[idx] and self.comp_key(self.keys[idx], key):
-                return self.vals[idx]
-        raise Error("Key not found in dict")
-    
-    fn __setitem__(inout self, key: String, value: V):
-        if self.load_factor() > 0.65:
-            #print("Growing to", 2*self.num_buckets)
-            self.grow()
+            let other_key = self.keys.unchecked_get(key_index - 1)
+            if other_key == key:
+                self.values.unchecked_set(key_index - 1, value)
+                if self.deleted_mask[key_index - 1]:
+                    self.count += 1
+                    self.deleted_mask[key_index - 1] = False
+                return
 
-        var idx = self.index_of(key)
-        #print("Adding", key, "at index", idx)
+            key_map_index = (key_map_index + 1) % modulo_mask
 
-        var overwriting = False
-        while self.taken_mask[idx]:
-            if self.comp_key(self.keys[idx], key):
-                overwriting = True
-                break
-            idx = (idx + 1) % self.num_buckets
-        
-        # Store a copy of the key string
-        if not overwriting:
-            let str_copy = strtype.alloc(len(key) + 1)
-            memcpy(str_copy, key._buffer.data, len(key) + 1)
-            self.keys.store(idx, str_copy)
-            self.num_elems += 1
+    fn __getitem__(self, key: K) raises -> V:
+        let key_hash = hash(key)
+        let modulo_mask = self.capacity - 1
+        var key_map_index = key_hash % modulo_mask
+        while True:
+            let key_index = self.key_map.__getitem__(index=key_map_index)
+            if key_index == 0:
+                raise Error("Key not found")
+            let other_key = self.keys.unchecked_get(key_index - 1)
+            if other_key == key:
+                if self.deleted_mask[key_index - 1]:
+                    raise Error("Key not found")
+                return self.values[key_index - 1]
+            key_map_index = (key_map_index + 1) % modulo_mask
 
-        self.vals.store(idx, value)
-        self.taken_mask.store(idx, True)
-        
-    fn get_keys(self) -> StringVector:
-        var ret = StringVector()
-        for i in range(self.num_buckets):
-            if self.taken_mask[i]:
-                ret.push_back(String(self.keys[i]))
-        return ret^
-
-struct IntMap[V: AnyType]:
-    var strmap: StringMap[V]
-    fn __init__(inout self):
-        self.strmap = StringMap[V]()
-    fn __getitem__(inout self, key: Int) raises -> V:
-        return self.strmap[String(key)]
-    fn __setitem__(inout self, key: Int, value: V) raises:
-        self.strmap[String(key)] = value
-    fn contains(self, key: Int) -> Bool:
-        return self.strmap.contains(String(key))
-    fn get_keys(self) -> DynamicVector[Int]:
-        var keys_int = DynamicVector[Int]()
+    fn get(self, key: K, default: V) -> V:
         try:
-            for key in self.strmap.get_keys():
-                keys_int.push_back(atol(key))
-        except:
-            print("Key conversion error")
-        return keys_int^
+            return self[key]
+        except Error:
+            return default
+
+    fn contains(self, key: K) -> Bool:
+        try:
+            let dummy = self[key]
+            return True
+        except Error:
+            return False
+
+    fn get_keys(self) -> Vector[K]:
+        return self.keys
+
+    fn pop(inout self, key: K) raises:
+        let key_hash = hash(key)
+        let modulo_mask = self.capacity - 1
+        var key_map_index = key_hash % modulo_mask
+        while True:
+            let key_index = self.key_map.__getitem__(index=key_map_index)
+            if key_index == 0:
+                raise Error("KeyError, key not found.")
+            let other_key = self.keys.unchecked_get(key_index - 1)
+            if other_key == key:
+                self.count -= 1
+                self.deleted_mask[key_index - 1] = True
+                return
+            key_map_index = (key_map_index + 1) % modulo_mask
+
+    fn __len__(self) -> Int:
+        return self.count

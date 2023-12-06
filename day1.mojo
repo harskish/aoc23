@@ -16,17 +16,17 @@ fn part1() raises -> String:
     return String(total) #53386
 
 fn part2() raises -> String:
-    var pattern_fwd = StringVector([
-        "0", "1", "2", "3", "4",
-        "5", "6", "7", "8", "9",
-        "zero", "one", "two", "three", "four",
-        "five", "six", "seven", "eight", "nine",
-    ])
+    let literals = String(
+        "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, zero, one, two, " \
+        "three, four, five, six, seven, eight, nine").split(", ")
 
-    # Reverse strings
+    # Strings to match
+    var pattern_fwd = StringVector()
     var pattern_rev = StringVector()
-    for s in pattern_fwd:
-       pattern_rev.push_back(reverse(s))
+
+    for i in range(len(literals)):
+        pattern_fwd.push_back(literals[i])
+        pattern_rev.push_back(reverse(literals[i]))
 
     var total = 0
     for line in get_lines('inputs/day1.txt'):

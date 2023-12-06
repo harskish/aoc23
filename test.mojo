@@ -2,7 +2,7 @@ import day1, day2, day3, day4
 
 fn check(val: String, target: String) raises:
     if val != target:
-        raise Error("Expected " + target)
+        raise Error("Expected (" + target + "), was (" + val + ")")
 
 fn check_previous() raises:
     check(day1.solve(), "53386, 53312")

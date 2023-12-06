@@ -2,7 +2,6 @@ from common.stringvector import StringVector
 from common.hashmap import StringMap, IntMap
 from common.io import get_contents, get_lines
 from common.parsing import split
-from common import List
 from math import min, max
 
 struct Field:
@@ -13,7 +12,7 @@ struct Field:
     def __init__(inout self, owned data: String):
         self.field = data
         let rows = split(data, "\n")
-        self.H = rows.len()
+        self.H = len(rows)
         self.W = len(rows[0])
     
     # Out of bounds reads replaced by `.`
@@ -41,8 +40,8 @@ struct Field:
     fn nearby_gear(inout self, col: Int, row: Int) raises -> Int:
         for dr in range(-1, 2):
             for dc in range(-1, 2):
-                var c = col + dc
-                var r = row + dr
+                let c = col + dc
+                let r = row + dr
                 if self.char_at(c, r) == "*":
                     return r * self.W + c # unique id
         return -1
@@ -67,7 +66,7 @@ fn solve() raises -> String:
             if isdigit(curr._buffer[0]):
                 curr_num = curr_num + curr
                 if not is_part_num:
-                    is_part_num = field.nearby_symbols(c, r).len() > 0
+                    is_part_num = len(field.nearby_symbols(c, r)) > 0
                 if seen_gear == -1:
                     seen_gear = field.nearby_gear(c, r)
             else:
@@ -88,9 +87,8 @@ fn solve() raises -> String:
                 curr_num = ""
 
     var ratio_sum = 0
-    let keys = gear_ratios.get_keys()
-    for i in range(len(keys)):
-        if num_comp[keys[i]] == 2:
-            ratio_sum += gear_ratios[keys[i]]
+    for k in gear_ratios.get_keys():
+        if num_comp[k] == 2:
+            ratio_sum += gear_ratios[k]
 
     return String(total) + ", " + ratio_sum # 544433, 76314915
