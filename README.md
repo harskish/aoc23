@@ -5,10 +5,10 @@
         d$b
       .d\$$b.
     .d$i$$\$$b.
-       d$$@b                  Advent of Code 2023
-      d\$$$ib                  using Mojo (0.5.1)
-    .d$$$\$$$b
-  .d$$@$$$$\$$ib.
+       d$$@b             
+      d\$$$ib           Advent of Code 2023
+    .d$$$\$$$b           using Mojo v0.6.0 
+  .d$$@$$$$\$$ib.        
       d$$i$$b
      d\$$$$@$b
   .d$@$$\$$$$$@b.

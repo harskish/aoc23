@@ -1,6 +1,6 @@
 from utils.vector import DynamicVector
 
-# DynamicVector[String] does not provide __iter__, thus the class below
+# DynamicVector[T] does not provide __iter__, thus the class below
 # Original implementation: github.com/gabrieldemarmiesse/mojo-stdlib-extensions
 # This file is licensed under the MIT license (github.com/gabrieldemarmiesse/mojo-stdlib-extensions/blob/master/LICENSE)
 
