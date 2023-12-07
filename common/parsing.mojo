@@ -67,25 +67,3 @@ fn first_substr_match(source: String, inout targets: StringVector) raises -> Tup
                 return (i, j)
     
     return (-1, -1)
-
-# Matches python's string.split
-fn split(source: String, target: String) -> StringVector:
-    var ranges = DynamicVector[Tuple[Int, Int]]()
-    
-    var i = 0
-    while True:
-        let offs = source.find(target, i)
-        if offs == -1:
-            ranges.push_back((i, len(source)))
-            break
-        else:
-            ranges.push_back((i, i+offs))
-            i += len(target) + offs
-    
-    var parts = StringVector()
-    for i in range(len(ranges)):
-        let i1 = ranges[i].get[0, Int]()
-        let i2 = ranges[i].get[1, Int]()
-        parts.push_back(source[i1:i2])
-    
-    return parts^

@@ -1,7 +1,6 @@
 from common.stringvector import StringVector
 from common.hashmap import StringMap, IntMap
 from common.io import get_contents, get_lines
-from common.parsing import split
 from math import min, max
 
 struct Field:
@@ -11,7 +10,7 @@ struct Field:
     
     def __init__(inout self, owned data: String):
         self.field = data
-        let rows = split(data, "\n")
+        let rows = data.split("\n")
         self.H = len(rows)
         self.W = len(rows[0])
     

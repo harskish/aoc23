@@ -1,12 +1,12 @@
 from common.stringvector import StringVector
 from common.hashmap import StringMap, IntMap
 from common.io import get_contents, get_lines
-from common.parsing import split, ints
+from common.parsing import ints
 from common.sorting import selection_sort
 
 fn compute_matches(game: String) raises -> Int:
-    let winning = ints(split(split(game, ":")[1], "|")[0])
-    let pulled = ints(split(split(game, ":")[1], "|")[1])
+    let winning = ints(game.split(":")[1].split("|")[0])
+    let pulled = ints(game.split(":")[1].split("|")[1])
     
     var matches = 0
     for i in range(len(pulled)):

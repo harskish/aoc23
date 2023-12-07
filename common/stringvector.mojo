@@ -1,4 +1,5 @@
 from utils.vector import DynamicVector
+from .iter import DynamicVecIterator
 
 # DynamicVector[T] does not provide __iter__, thus the class below
 # Original implementation: github.com/gabrieldemarmiesse/mojo-stdlib-extensions
@@ -23,8 +24,8 @@ struct Vector[T: CollectionElement](Sized):
         else:
             return index
 
-    fn __iter__(self) raises -> ListIterator[T]:
-        return ListIterator[T](self._raw, len(self._raw))
+    fn __iter__(self) raises -> DynamicVecIterator[T]:
+        return DynamicVecIterator[T](self._raw, len(self._raw))
 
     fn push_back(inout self, value: T):
         self._raw.push_back(value)
@@ -122,22 +123,3 @@ fn list_to_str(input_list: Vector[Int]) raises -> String:
         else:
             result += repr
     return result + "]"
-
-
-struct ListIterator[T: CollectionElement]:
-    var offset: Int
-    var max_idx: Int
-    var storage: Vector[T]
-    
-    fn __init__(inout self, storage: Vector[T], max_idx: Int):
-        self.offset = 0
-        self.max_idx = max_idx
-        self.storage = storage
-    
-    fn __len__(self) -> Int:
-        return self.max_idx - self.offset
-    
-    fn __next__(inout self) raises -> T:
-        let ret: T = self.storage[self.offset]
-        self.offset += 1
-        return ret
