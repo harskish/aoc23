@@ -4,9 +4,8 @@
 from test import check_previous
 from common.parsing import reverse
 
-#import day4
+from day5 import solve
 
 fn main() raises:
-    check_previous()
-    #print(day4.solve())
-    print("Done")
+    #check_previous()
+    print(solve())
