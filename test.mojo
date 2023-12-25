@@ -1,4 +1,5 @@
 import day1, day2, day3, day4
+from common.iter import test_slice
 
 fn check(val: String, target: String) raises:
     if val != target:
@@ -12,4 +13,5 @@ fn check_previous() raises:
     print("Passed")
 
 fn main() raises:
+    test_slice()
     check_previous()

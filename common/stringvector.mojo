@@ -1,4 +1,4 @@
-from utils.vector import DynamicVector
+from collections.vector import DynamicVector
 from .iter import DynamicVecIterator
 
 # DynamicVector[T] does not provide __iter__, thus the class below

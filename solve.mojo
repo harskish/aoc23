@@ -1,6 +1,3 @@
-#from builtin.builtin_list import ListLiteral
-#from common.io import get_lines
-#from common.hashmap import StringMap
 from test import check_previous
 from common.parsing import reverse
 
